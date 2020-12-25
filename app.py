@@ -32,5 +32,30 @@ def index():
         tasks = Todo.query.order_by(Todo.date_created).all() #get all tasks from db in order added
         return render_template('index.html', tasks=tasks) #no need route bcs the method auto searches for templates folder
 
+@app.route('/delete/<int:id>')
+def delete(id):
+    task_to_delete = Todo.query.get_or_404(id)
+
+    try:
+        db.session.delete(task_to_delete)
+        db.session.commit()
+        return redirect('/')
+    except:
+        return 'Oops! there was issue deleting your task.'
+
+@app.route('/update/<int:id>', methods=['GET', 'POST'])
+def update(id):
+    task_to_update = Todo.query.get_or_404(id)
+    if request.method == 'POST':
+        task_to_update.content = request.form['content']
+
+        try:
+            db.session.commit()
+            return redirect('/')
+        except:
+            return 'Oops! There was an issue updating.'
+    else:
+        return render_template('update.html', task=task_to_update)
+
 if __name__ == "__main__":
     app.run(debug=True)
